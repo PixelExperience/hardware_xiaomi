@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a201e23c_99c64f6e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000668
+      },
+      "writtenOn": "2022-05-16T08:24:57Z",
+      "side": 1,
+      "message": "\u001b[1mbuild/make/core/base_rules.mk:335: \u001b[31merror: \u001b[0m\u001b[1mexternal/faceunlock: MODULE.TARGET.SHARED_LIBRARIES.libmegface already defined by hardware/xiaomi/megvii.\u001b[0m\n\n",
+      "revId": "5fdf60b4604f888e8166239e94ab904680f72d64",
+      "serverId": "8ba0da3e-d57f-4bbe-ac74-faf358ba962a"
+    }
+  ]
+}
