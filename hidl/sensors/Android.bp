@@ -14,7 +14,7 @@
 // limitations under the License.
 
 cc_binary {
-    name: "android.hardware.sensors@2.1-service.multihal",
+    name: "android.hardware.sensors@2.1-service.xiaomi-multihal",
     defaults: [
         "hidl_defaults",
     ],
@@ -23,8 +23,8 @@ cc_binary {
     srcs: [
         "service.cpp",
     ],
-    init_rc: ["android.hardware.sensors@2.1-service-multihal.rc"],
-    vintf_fragments: ["android.hardware.sensors@2.1-multihal.xml"],
+    init_rc: ["android.hardware.sensors@2.1-service.xiaomi-multihal.rc"],
+    vintf_fragments: ["android.hardware.sensors@2.1.xiaomi-multihal.xml"],
     header_libs: [
         "android.hardware.sensors@2.X-shared-utils",
     ],
