@@ -30,8 +30,7 @@ bool LED::setBreath(uint8_t value) {
 }
 
 bool LED::setBrightness(uint8_t value) {
-    return writeToFile(mBasePath + "brightness", value == 0 ? 0 :
-            (value - 1) * (mMaxBrightness - 1) / (0xFF - 1) + 1);
+    return writeToFile(mBasePath + "brightness", value * mMaxBrightness / 0xFF);
 }
 
 } // namespace light
