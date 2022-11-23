@@ -16,12 +16,14 @@
 
 #define LOG_TAG "powerhal-libperfmgr"
 
-#include <thread>
-
 #include <android-base/logging.h>
 #include <android-base/properties.h>
+#include <android/binder_ibinder_platform.h>
 #include <android/binder_manager.h>
 #include <android/binder_process.h>
+#include <perfmgr/HintManager.h>
+
+#include <thread>
 
 #include "Power.h"
 #include "PowerExt.h"
@@ -34,31 +36,26 @@ using aidl::google::hardware::power::impl::pixel::PowerSessionManager;
 using ::android::perfmgr::HintManager;
 
 constexpr std::string_view kPowerHalInitProp("vendor.powerhal.init");
-constexpr std::string_view kConfigProperty("vendor.powerhal.config");
-constexpr std::string_view kConfigDefaultFileName("powerhint.json");
 
 int main() {
-    const std::string config_path =
-            "/vendor/etc/" +
-            android::base::GetProperty(kConfigProperty.data(), kConfigDefaultFileName.data());
-    LOG(INFO) << "Xiaomi Power HAL AIDL Service with Extension is starting with config: "
-              << config_path;
-
     // Parse config but do not start the looper
-    std::shared_ptr<HintManager> hm = HintManager::GetFromJSON(config_path, false);
+    std::shared_ptr<HintManager> hm = HintManager::GetInstance();
     if (!hm) {
-        LOG(FATAL) << "Invalid config: " << config_path;
+        LOG(FATAL) << "HintManager Init failed";
     }
 
     // single thread
     ABinderProcess_setThreadPoolMaxThreadCount(0);
 
     // core service
-    std::shared_ptr<Power> pw = ndk::SharedRefBase::make<Power>(hm);
+    std::shared_ptr<Power> pw = ndk::SharedRefBase::make<Power>();
     ndk::SpAIBinder pwBinder = pw->asBinder();
+    AIBinder_setMinSchedulerPolicy(pwBinder.get(), SCHED_NORMAL, -20);
 
     // extension service
-    std::shared_ptr<PowerExt> pwExt = ndk::SharedRefBase::make<PowerExt>(hm);
+    std::shared_ptr<PowerExt> pwExt = ndk::SharedRefBase::make<PowerExt>();
+    auto pwExtBinder = pwExt->asBinder();
+    AIBinder_setMinSchedulerPolicy(pwExtBinder.get(), SCHED_NORMAL, -20);
 
     // attach the extension to the same binder we will be registering
     CHECK(STATUS_OK == AIBinder_setExtension(pwBinder.get(), pwExt->asBinder().get()));
@@ -68,14 +65,13 @@ int main() {
     CHECK(status == STATUS_OK);
     LOG(INFO) << "Xiaomi Power HAL AIDL Service with Extension is started.";
 
-    if (::android::base::GetIntProperty("vendor.powerhal.adpf.rate", -1) != -1) {
+    if (HintManager::GetInstance()->GetAdpfProfile()) {
         PowerHintMonitor::getInstance()->start();
-        PowerSessionManager::getInstance()->setHintManager(hm);
     }
 
     std::thread initThread([&]() {
         ::android::base::WaitForProperty(kPowerHalInitProp.data(), "1");
-        hm->Start();
+        HintManager::GetInstance()->Start();
     });
     initThread.detach();
 
