@@ -26,7 +26,7 @@ cc_binary {
         "HalProxyCallback.cpp",
     ],
     init_rc: ["android.hardware.sensors@2.1-service.xiaomi-multihal.rc"],
-    vintf_fragments: ["android.hardware.sensors@2.1.xiaomi-multihal.xml"],
+    vintf_fragments: ["android.hardware.sensors@2.1-service.xiaomi-multihal.xml"],
     header_libs: [
         "android.hardware.sensors@2.X-shared-utils",
     ],
